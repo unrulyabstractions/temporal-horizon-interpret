@@ -85,6 +85,23 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121
 
 ## Quick Start
 
+### 0. Validate Setup (Recommended First Step)
+
+```bash
+# Verify TransformerLens, model loading, and full pipeline
+python scripts/validate_pipeline.py
+
+# Quick validation (skips full pipeline test)
+python scripts/validate_pipeline.py --quick
+```
+
+This validates:
+- ✓ TransformerLens installation and GPT-2 loading
+- ✓ Activation extraction with proper hooks
+- ✓ Dataset loading and expansion
+- ✓ Probe training pipeline
+- ✓ Latents integration (optional)
+
 ### 1. Generate Dataset
 
 ```bash
@@ -97,25 +114,27 @@ python scripts/generate_dataset.py \
     --api-key $OPENAI_API_KEY
 ```
 
-### 2. Extract Activations
+### 2. Extract Activations (Using TransformerLens)
 
-```python
-from src.models.model_loader import load_model
-from src.models.activation_extractor import ActivationExtractor
-from src.dataset.loader import load_dataset
-
-# Load model and dataset
-model = load_model("gpt2", device="cuda")
-dataset = load_dataset("data/raw/prompts.jsonl")
-
-# Extract activations
-extractor = ActivationExtractor(model)
-activations = extractor.extract_batch(
-    dataset["prompts"],
-    layers=[8, 9, 10, 11],  # Focus on later layers
-    save_path="data/processed/activations_gpt2.h5"
-)
+```bash
+# Extract activations from temporal horizon dataset
+python scripts/extract_activations.py \
+    --dataset data/raw/prompts.jsonl \
+    --model gpt2 \
+    --layers 8 9 10 11 \
+    --output data/processed/activations_gpt2.h5 \
+    --batch-size 8 \
+    --component resid_post \
+    --position last
 ```
+
+**What this does:**
+- Loads GPT-2 using TransformerLens `HookedTransformer`
+- Extracts residual stream activations (`resid_post`) from layers 8-11
+- Takes last token position (captures final reasoning state)
+- Saves to HDF5 format with labels
+
+See [TransformerLens Usage Guide](docs/transformerlens_usage.md) for details.
 
 ### 3. Train Probes
 
@@ -348,10 +367,17 @@ pytest tests/test_probing.py -v
 ## Documentation
 
 - [Methodology](docs/methodology.md): Detailed explanation of our approach
+- [TransformerLens Usage](docs/transformerlens_usage.md): **Essential guide** for activation extraction
 - [API Reference](docs/api_reference.md): Complete API documentation
 - [Latents Integration](docs/latents_integration.md): Probe vs steering comparison guide
 - [Experiment Log](docs/experiment_log.md): Template for tracking experiments
 - [Results](docs/results.md): Experimental results and analysis
+
+### Quick Reference
+
+- **New to the project?** Start with [validate_pipeline.py](scripts/validate_pipeline.py) and [complete_workflow.py](examples/complete_workflow.py)
+- **Extracting activations?** See [TransformerLens Usage Guide](docs/transformerlens_usage.md)
+- **Comparing approaches?** See [Latents Integration Guide](docs/latents_integration.md)
 
 ## Citation
 
