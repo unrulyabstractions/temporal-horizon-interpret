@@ -19,15 +19,28 @@ This repository implements a comprehensive pipeline for investigating how LLMs i
 - **Divergence Detection**: Detect mismatches between stated and internal temporal representations
 - **Cross-Model Validation**: Compare temporal reasoning mechanisms across model families
 - **Comprehensive Visualization**: Generate publication-ready figures and interactive visualizations
+- **Latents Integration**: Compare probe-based approach with Contrastive Activation Addition (CAA) steering from the [latents library](https://github.com/justinshenk/latents)
+
+### Dual Approach: Probing + Steering
+
+This project uniquely combines **two complementary approaches** to temporal horizon detection:
+
+1. **Probe-Based** (Our Core Approach): Train classifiers on activations to measure what temporal information is encoded
+2. **Steering-Based** (via Latents Integration): Use Contrastive Activation Addition to directly control temporal scope in generation
+
+The integration validates findings across both methods and provides richer analysis. See [Latents Integration Guide](docs/latents_integration.md) for details.
 
 ## Installation
 
 ### Option 1: pip (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/temporal-horizon-detection.git
+# Clone the repository with submodules
+git clone --recursive https://github.com/yourusername/temporal-horizon-detection.git
 cd temporal-horizon-detection
+
+# Or if already cloned, initialize submodules
+git submodule update --init --recursive
 
 # Create and activate virtual environment
 python -m venv venv
@@ -41,6 +54,9 @@ pip install -e ".[api]"
 
 # Install development dependencies
 pip install -e ".[dev]"
+
+# Install latents library for steering experiments (optional but recommended)
+pip install -e external/latents
 ```
 
 ### Option 2: conda
@@ -227,6 +243,46 @@ important_heads = compute_head_importance(results, top_k=10)
 print(f"Top heads for temporal reasoning: {important_heads}")
 ```
 
+### Example 4: Steering-Based Temporal Control (Latents Integration)
+
+```python
+from src.utils.latents_integration import TemporalSteeringIntegration
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+
+# Load model
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+
+# Initialize steering
+steering = TemporalSteeringIntegration(model, tokenizer)
+
+# Option 1: Use pre-trained temporal steering
+steering.load_pretrained_temporal_steering('gpt2')
+
+# Generate with different temporal scopes
+prompt = "How should we address climate change?"
+
+short_term = steering.generate_with_steering(prompt, strength=-0.8)  # Immediate focus
+long_term = steering.generate_with_steering(prompt, strength=0.8)   # Long-term focus
+
+print(f"Short-term: {short_term}")
+print(f"Long-term: {long_term}")
+
+# Option 2: Extract steering vectors from your dataset
+from src.dataset.loader import load_dataset
+
+dataset = load_dataset("data/raw/prompts.jsonl")
+steering_vectors = steering.extract_steering_vectors_from_dataset(dataset)
+
+# Compare with probe-based approach
+similarities = steering.analyze_steering_activation_overlap(
+    steering_vectors, probe.linear.weight
+)
+print(f"Probe-steering alignment: {similarities}")
+```
+
+See [Latents Integration Guide](docs/latents_integration.md) for comprehensive comparison between probe-based and steering-based approaches.
+
 ## Configuration
 
 All experiments can be configured via YAML files in `configs/`:
@@ -293,6 +349,7 @@ pytest tests/test_probing.py -v
 
 - [Methodology](docs/methodology.md): Detailed explanation of our approach
 - [API Reference](docs/api_reference.md): Complete API documentation
+- [Latents Integration](docs/latents_integration.md): Probe vs steering comparison guide
 - [Experiment Log](docs/experiment_log.md): Template for tracking experiments
 - [Results](docs/results.md): Experimental results and analysis
 

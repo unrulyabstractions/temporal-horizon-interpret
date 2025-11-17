@@ -1,0 +1,3 @@
+[submodule "external/latents"]
+	path = external/latents
+	url = https://github.com/justinshenk/latents.git
