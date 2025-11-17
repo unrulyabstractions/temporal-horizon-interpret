@@ -1,0 +1,26 @@
+# Dataset generation configuration
+
+dataset:
+  num_pairs: 300
+  domains:
+    - business
+    - science
+    - personal
+  
+  # LLM API settings
+  api_provider: openai  # or anthropic
+  model: gpt-3.5-turbo
+  temperature: 0.7
+  
+  # Generation settings
+  use_variations: true
+  seed: 42
+  
+  # Output
+  output_path: data/raw/prompts.jsonl
+  
+# Validation settings
+validation:
+  enable: true
+  min_prompt_length: 10
+  similarity_threshold: 0.3

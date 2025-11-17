@@ -1,0 +1,46 @@
+# Probe training configuration
+
+probe:
+  type: mlp  # linear, mlp, attention
+  hidden_size: 768
+  
+  # MLP-specific settings
+  num_layers: 2
+  hidden_dim: 384
+  dropout: 0.1
+  activation: relu  # relu, gelu, tanh
+
+training:
+  learning_rate: 0.001
+  weight_decay: 0.01
+  batch_size: 32
+  epochs: 100
+  early_stopping_patience: 10
+  
+  # Optimization
+  optimizer: adamw
+  scheduler: null  # cosine, linear, null
+  
+data:
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  stratify: true
+  random_state: 42
+
+# Evaluation
+evaluation:
+  metrics:
+    - accuracy
+    - f1
+    - auc
+    - precision
+    - recall
+  compute_per_domain: true
+  compute_confusion_matrix: true
+
+# Checkpointing
+checkpoint:
+  save_best: true
+  save_frequency: 10
+  checkpoint_dir: checkpoints/probes/

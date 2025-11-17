@@ -1,0 +1,19 @@
+# Model configuration
+
+model:
+  name: gpt2  # gpt2, gpt2-medium, pythia-160m, etc.
+  device: cuda  # cpu, cuda, cuda:0
+  dtype: float32
+  
+# Activation extraction
+extraction:
+  layers: [8, 9, 10, 11]  # or "all", "early", "middle", "late"
+  component: residual  # residual, attn, mlp, attn_out
+  batch_size: 8
+  position_strategy: last  # last, mean, first
+  save_format: hdf5
+  
+# Paths
+paths:
+  activations_dir: data/processed/
+  cache_dir: .cache/

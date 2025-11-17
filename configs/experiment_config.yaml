@@ -1,0 +1,47 @@
+# Full experiment configuration
+
+experiment:
+  name: temporal_horizon_gpt2
+  description: Temporal horizon detection in GPT-2
+  seed: 42
+  
+# Dataset
+dataset:
+  num_pairs: 300
+  domains: [business, science, personal]
+  
+# Models to analyze
+models:
+  - gpt2
+  - gpt2-medium
+  - pythia-160m
+
+# Probes to train
+probes:
+  - type: linear
+    name: linear_probe
+  - type: mlp
+    name: mlp_2layer
+    num_layers: 2
+
+# Circuit analysis
+circuit_analysis:
+  methods:
+    - activation_patching
+    - ablation
+  layers: [8, 9, 10, 11]
+  top_k_heads: 10
+
+# Outputs
+outputs:
+  results_dir: results/
+  figures_dir: paper/figures/
+  tables_dir: paper/tables/
+  checkpoints_dir: checkpoints/
+
+# Logging
+logging:
+  level: INFO
+  log_dir: logs/
+  use_wandb: false
+  wandb_project: temporal-horizon-detection
